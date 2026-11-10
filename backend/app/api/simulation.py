@@ -54,14 +54,25 @@ def _get_default_platform(simulation_id: str) -> str:
 # 添加此前缀可以避免Agent调用工具，直接用文本回复
 INTERVIEW_PROMPT_PREFIX = "结合你的人设、所有的过往记忆与行动，不调用任何工具直接用文本回复我："
 
+# penguat peran: dipakai untuk agen mahasiswa agar tidak keluar menjadi analis/asisten
+INTERVIEW_ROLE_GUARD = (
+    "【指令】你就是这个人本人，不是AI、不是分析师、不是顾问。"
+    "用第一人称、像在chat WhatsApp ke teman，bahasa Indonesia santai。"
+    "jawab berdasarkan pengalaman nyata yang pernah kamu alami, sebutkan kejadian konkret, "
+    "maksimal 3 kalimat。"
+    "jangan menghitung model bisnis, jangan memberi saran ke pemilik warung，"
+    "jangan menyebut dirimu asisten atau software engineer。\n"
+)
+
 
 def optimize_interview_prompt(prompt: str) -> str:
     """
-    优化Interview提问，添加前缀避免Agent调用工具
-    
+    优化Interview提问：添加避免调用工具的前缀，并加上角色指令，
+    让模拟Agent（如mahasiswa segmen hemat）保持在第一人称的生活视角。
+
     Args:
         prompt: 原始提问
-        
+
     Returns:
         优化后的提问
     """
@@ -70,7 +81,7 @@ def optimize_interview_prompt(prompt: str) -> str:
     # 避免重复添加前缀
     if prompt.startswith(INTERVIEW_PROMPT_PREFIX):
         return prompt
-    return f"{INTERVIEW_PROMPT_PREFIX}{prompt}"
+    return f"{INTERVIEW_PROMPT_PREFIX}\n{INTERVIEW_ROLE_GUARD}\n{prompt}"
 
 
 # ============== 实体读取接口 ==============

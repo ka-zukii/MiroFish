@@ -250,7 +250,22 @@ class LLMClient:
                 finish_reason=finish_reason,
             )
 
-        content = _clean_chat_text(extract_chat_completion_text(response))
+        raw_text = extract_chat_completion_text(response)
+
+        # DEBUG SEMENTARA: simpan isi mentah ke file agar bisa diperiksa
+        try:
+            with open("debug_llm_raw.txt", "w", encoding="utf-8") as f:
+                f.write(f"finish_reason={finish_reason}\n")
+                f.write(f"raw_len={len(raw_text)}\n")
+                f.write("----- RAW (awal 2000 char) -----\n")
+                f.write(raw_text[:2000])
+                f.write("\n----- RAW (akhir 500 char) -----\n")
+                f.write(raw_text[-500:])
+        except Exception:
+            pass
+
+        content = _clean_chat_text(raw_text)
+        logger.error("DEBUG content mulai=%r panjang=%d", content[:300], len(content))
         if not content:
             raise LLMResponseError(
                 "LLM returned empty JSON content",
@@ -260,9 +275,6 @@ class LLMClient:
         try:
             value = json.loads(content)
         except json.JSONDecodeError as strict_error:
-            # Some compatible providers append a short explanation after an
-            # otherwise complete JSON object. Accept only an object decoded
-            # from the beginning; never repair or invent truncated JSON.
             try:
                 value, end = json.JSONDecoder().raw_decode(content)
             except json.JSONDecodeError:

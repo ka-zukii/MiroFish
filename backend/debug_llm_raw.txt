@@ -1,0 +1,6 @@
+finish_reason=stop
+raw_len=624
+----- RAW (awal 2000 char) -----
+{"questions": ["Looking ahead a few months, which warning signal worries you most: price hikes, smaller portions, hygiene lapses, or new competitors moving in?", "If a promo war breaks out around campus, how long can you keep your prices and margins intact before something has to give?", "Which shop in the UMS campus market do you see as most vulnerable right now, and what makes it fragile?", "What single change, in price, portion, taste, or service, would make you stop buying from your usual shop for good?", "Are students already buying less often or trading down, and how do you read that shift in your own sales?"]}
+----- RAW (akhir 500 char) -----
+pses, or new competitors moving in?", "If a promo war breaks out around campus, how long can you keep your prices and margins intact before something has to give?", "Which shop in the UMS campus market do you see as most vulnerable right now, and what makes it fragile?", "What single change, in price, portion, taste, or service, would make you stop buying from your usual shop for good?", "Are students already buying less often or trading down, and how do you read that shift in your own sales?"]}

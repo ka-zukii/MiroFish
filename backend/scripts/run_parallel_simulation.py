@@ -31,6 +31,7 @@ OASIS 双平台并行模拟预设脚本
 # ============================================================
 import sys
 import os
+import gateway_compat
 
 if sys.platform == 'win32':
     # 设置 Python 默认 I/O 编码为 UTF-8
@@ -206,6 +207,8 @@ REDDIT_ACTIONS = [
 IPC_COMMANDS_DIR = "ipc_commands"
 IPC_RESPONSES_DIR = "ipc_responses"
 ENV_STATUS_FILE = "env_status.json"
+
+FINISHED_FLAG_NAME = "run_finished.flag"
 
 class CommandType:
     """命令类型常量"""
@@ -1532,6 +1535,10 @@ async def main():
     
     config = load_config(args.config)
     simulation_dir = os.path.dirname(args.config) or "."
+    _stale_flag = os.path.join(simulation_dir, FINISHED_FLAG_NAME)
+    if os.path.exists(_stale_flag):
+        os.remove(_stale_flag)
+    wait_for_commands = not args.no_wait
     wait_for_commands = not args.no_wait
     
     # 初始化日志配置（禁用 OASIS 日志，清理旧文件）
@@ -1589,6 +1596,9 @@ async def main():
         twitter_result, reddit_result = results
     
     total_elapsed = (datetime.now() - start_time).total_seconds()
+    if wait_for_commands:
+        with open(os.path.join(simulation_dir, FINISHED_FLAG_NAME), 'w', encoding='utf-8') as f:
+            json.dump({"finished_at": datetime.now().isoformat()}, f)
     log_manager.info("=" * 60)
     log_manager.info(f"模拟循环完成! 总耗时: {total_elapsed:.1f}秒")
     

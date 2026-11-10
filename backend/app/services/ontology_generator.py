@@ -228,7 +228,15 @@ class OntologyGenerator:
         system_prompt = f"{ONTOLOGY_SYSTEM_PROMPT}\n\n{lang_instruction}\nIMPORTANT: Entity type names MUST be in English PascalCase (e.g., 'PersonEntity', 'MediaOrganization'). Relationship type names MUST be in English UPPER_SNAKE_CASE (e.g., 'WORKS_FOR'). Attribute names MUST be in English snake_case. Only description fields and analysis_summary should use the specified language above."
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message}
+            {"role": "user", "content": user_message},
+            {
+                "role": "user",
+                "content": (
+                    "PENGINGAT FORMAT: Balas HANYA dengan satu objek JSON yang valid "
+                    "dan dimulai dengan karakter '{'. Jangan menulis Markdown, heading (#), "
+                    "tabel, daftar, atau penjelasan apa pun di luar JSON."
+                ),
+            },
         ]
         
         # 调用LLM

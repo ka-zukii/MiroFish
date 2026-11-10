@@ -218,6 +218,8 @@ class SimulationRunner:
         '../../uploads/simulations'
     )
     
+    FINISHED_FLAG_NAME = "run_finished.flag"
+    
     # 脚本目录
     SCRIPTS_DIR = os.path.join(
         os.path.dirname(__file__),
@@ -653,6 +655,8 @@ class SimulationRunner:
                 
                 # 更新状态
                 cls._save_run_state(state)
+                if os.path.exists(os.path.join(sim_dir, cls.FINISHED_FLAG_NAME)):
+                    break
                 time.sleep(2)
             
             # 进程结束后，最后读取一次日志
@@ -661,7 +665,10 @@ class SimulationRunner:
             if os.path.exists(reddit_actions_log):
                 cls._read_action_log(reddit_actions_log, reddit_position, state, "reddit")
             
-            exit_code = process.returncode
+            if process.poll() is not None:
+                exit_code = process.returncode
+            else:
+                exit_code = 0  # sudah selesai semua ronde, proses masih menunggu perintah
             
         except Exception as e:
             logger.error(f"监控线程异常: {simulation_id}, error={str(e)}")

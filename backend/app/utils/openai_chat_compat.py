@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
+import json
+from openai.types.chat import ChatCompletion
 
 def is_gpt5_family(model: Optional[str]) -> bool:
     """Return True when model belongs to GPT-5 family aliases/snapshots."""
@@ -16,6 +18,23 @@ def is_gpt5_family(model: Optional[str]) -> bool:
         return False
     return model.strip().lower().startswith("gpt-5")
 
+def _parse_gateway_body(text: str) -> Dict[str, Any]:
+    """Ambil objek JSON pertama dari body respons.
+
+    Beberapa gateway (mis. openagentic.id) menambahkan trailer SSE
+    seperti 'data: [DONE]' setelah JSON walaupun request tidak meminta streaming.
+    """
+    stripped = text.lstrip("\ufeff \t\r\n")
+    if stripped.startswith("data:"):
+        for line in stripped.splitlines():
+            line = line.strip()
+            if line.startswith("data:"):
+                payload = line[5:].strip()
+                if payload and payload != "[DONE]":
+                    return json.loads(payload)
+        raise ValueError("Body SSE dari provider tidak berisi JSON")
+    value, _ = json.JSONDecoder().raw_decode(stripped)
+    return value
 
 def create_chat_completion(
     client: Any,
@@ -54,7 +73,9 @@ def create_chat_completion(
         else:
             kwargs["max_tokens"] = max_tokens
 
-    return client.chat.completions.create(**kwargs)
+    raw = client.chat.completions.with_raw_response.create(**kwargs)
+    data = _parse_gateway_body(raw.http_response.text)
+    return ChatCompletion.model_validate(data)
 
 
 def extract_chat_completion_text(response: Any) -> str:
